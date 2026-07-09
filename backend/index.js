@@ -4,7 +4,7 @@ import {query} from "./config/db.js";
 import errorHandler from "./middleware/errorHandler.js";
 import asyncHandler from  "./utils/asyncHandler.js";
 //routers
-import hrRouter from "./routes/v1/hr.js";
+import userRouter from "./routes/v1/user.router.js";
 
 const PORT = process.env.PORT || 4000;
 const HOST = process.env.HOST || "localhost";
@@ -18,7 +18,7 @@ app.get("/",asyncHandler(async (req, res,next)=>{
     throw new Error("Demo to check error");
 }));
 
-app.use("/v1",hrRouter);
+app.use("/v1",userRouter);
 
 app.use(errorHandler);
 app.listen(PORT, HOST,console.log(`http://${HOST}:${PORT}`));
