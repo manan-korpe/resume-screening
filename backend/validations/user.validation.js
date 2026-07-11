@@ -1,24 +1,33 @@
-import joi from "joi";
-const registerSchema = joi.object({
-    name:joi.string()
+import {z} from "zod";
+
+const registerSchema = z.object({
+    name:z.string()
     .min(3)
     .max(20)
-    .trim()
-    .required(),
+    .trim(),
     
-    email:joi.string()
+    email:z.string()
     .email()
-    .lowercase()
-    .required(),
+    .toLowerCase(),
     
-    password:joi.string()
+    password:z.string()
     .min(8)
-    .max(20)
-    .required(),
+    .max(20),
     
-    role:joi.number()
-    .valid(0,1,2,3)
-    .default(0),
+    role:z.enum(["0","1","2","3"])
+    .default("0"),
 });
 
-export default registerSchema;
+const loginSchema = z.object({
+    email:z.string()
+    .email()
+    .toLowerCase(),
+
+    password:z.string()
+    .min(8)
+});
+
+export {
+    registerSchema,
+    loginSchema
+};
