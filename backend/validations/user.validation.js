@@ -27,7 +27,17 @@ const loginSchema = z.object({
     .min(8)
 });
 
+const passwordResetSchema = z.object({
+    oldPassword:z.string().min(8),
+    password:z.string().min(8),
+    confirmPassword:z.string().min(8)
+}).refine((data)=>data.password===data.confirmPassword,{
+    message:"Password do not match",
+    path:["confirmPassword"]
+});
+
 export {
     registerSchema,
-    loginSchema
+    loginSchema,
+    passwordResetSchema
 };

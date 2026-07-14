@@ -8,8 +8,8 @@ class ResponseHalper {
     }
 
     static error(res, message = "Something went wrong", statusCode = 500, errors = null) {
-        res.statusCode = statusCode;
-
+        res.statusCode = statusCode ;
+        console.log(res.statusCode);
         const err = new Error(message);
         err.errors = errors;
 

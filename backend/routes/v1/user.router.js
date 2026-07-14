@@ -1,14 +1,16 @@
 import { Router } from "express";
 import validate from "../../middleware/validate.js";
 import { authenticate } from "../../middleware/auth.js";
-import { registerSchema, loginSchema } from "../../validations/user.validation.js";
-import { users, register, login, refreshAccessToken, singleUser } from "../../controllers/user.controller.js";
+import { registerSchema, loginSchema, passwordResetSchema } from "../../validations/user.validation.js";
+import { users, register, login, logout, forgetPassword, refreshAccessToken, singleUser } from "../../controllers/user.controller.js";
 
 const router = Router();
 
 router.post("/register", validate(registerSchema), register);
 router.post("/login", validate(loginSchema), login);
-router.post("/refreshToken", refreshAccessToken);
+router.get("/logout",authenticate,logout);
+router.post("/forgetpassword",authenticate,validate(passwordResetSchema),forgetPassword);
+router.post("/refresh", refreshAccessToken);
 router.route("/users")
     .get(authenticate, users);
 

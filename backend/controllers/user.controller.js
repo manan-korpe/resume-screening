@@ -5,6 +5,11 @@ import bcrypt from "bcrypt";
 import { generateAccessToken, generateRefreshToken } from "../utils/tokenHalper.js";
 import { query } from "../config/db.js";
 
+const option = {
+    httpOnly: true,
+    secure: true,
+    sameSite: "strict"
+};
 
 const register = asyncHandler(async (req, res, next) => {
     const { name, email, password, role } = req.body;
@@ -34,30 +39,24 @@ const login = asyncHandler(async (req, res, next) => {
     user = user.rows[0];
 
     if (!user) {
-        ResponseHalper.error(res, "Invalid email or password");
+        ResponseHalper.error(res, "Invalid email or password",401);
     }
 
     const isValid = await bcrypt.compare(password, user.password);
 
     if (!isValid) {
-        ResponseHalper.error(res, "Invalid email or password")
+        ResponseHalper.error(res, "Invalid email or password",401)
     }
 
     const accessToken = generateAccessToken(user);
     const refreshToken = generateRefreshToken(user);
 
-    const option = {
-        httpOnly: true,
-        secure: true,
-        sameSite: "strict"
-    };
-
     res
         .cookie("accessToken", accessToken, option)
         .cookie("refreshToken", refreshToken, option);
 
-    await query("update users set accesstoken=$1,refreshtoken=$2 where id=$3",[accessToken, refreshToken, user.id]);
-    
+    await query("update users set accesstoken=$1,refreshtoken=$2 where id=$3", [accessToken, refreshToken, user.id]);
+
     return ResponseHalper.success(
         res,
         "Login successful.",
@@ -67,11 +66,37 @@ const login = asyncHandler(async (req, res, next) => {
 });
 
 const logout = asyncHandler(async (req, res, next) => {
+    const { id } = req.body;
+    res
+        .clearCookie("accessToken",option)
+        .clearCookie("refreshToken",option);
 
+    await query("update users set accesstoken=$1, refreshtoken=$2 where id=$3", [null, null, id]);
+
+    return ResponseHalper.success(
+        res,
+        "Logout successful.",
+        {},
+        200
+    );
 });
 
 const forgetPassword = asyncHandler(async (req, res, next) => {
+    const {oldPassword,password} =req.body;
+    
+    const isValidPassword = await bcrypt.compare(oldPassword,req.user?.password);
+    if(!isValidPassword){
+        ResponseHalper.error(res, "Invalid old password.",400);
+    }
 
+    const hashPassword = await bcrypt.hash(password,10);
+    const user = await query("update users set password=$1 where id=$2",[hashPassword, req.user?.id]);
+
+    if(user.rowCount === 0){
+        ResponseHalper.error(res,"Forget password failed.");
+    }
+
+    return ResponseHalper.success(res, "Password successfuly set.",{},201);
 });
 
 const resetPassword = asyncHandler(async (req, res, next) => {
@@ -117,7 +142,6 @@ const refreshAccessToken = asyncHandler(async (req, res, next) => {
 
     return ResponseHalper.success(res, "Refreshed token refreshed.", {}, 201)
 });
-
 
 const users = asyncHandler(async (req, res, next) => {
     const user = await query("select * from users");

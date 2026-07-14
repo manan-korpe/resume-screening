@@ -1,5 +1,6 @@
 import express from "express";
 import 'dotenv/config';
+import cors from "cors";
 import errorHandler from "./middleware/errorHandler.js";
 import asyncHandler from  "./utils/asyncHandler.js";
 import cookieParser from "cookie-parser";
@@ -11,6 +12,13 @@ const PORT = process.env.PORT || 4000;
 const HOST = process.env.HOST || "localhost";
 
 const app = express();
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  })
+);
+
 app.use(express.json());
 app.use(express.urlencoded({extended:true}));
 app.use(cookieParser());
