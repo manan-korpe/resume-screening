@@ -46,7 +46,7 @@ export default function Layout() {
             </BreadcrumbList>
           </Breadcrumb>
         </header>
-        <main className="p-4">
+        <main className="px-6">
           <Outlet />
         </main>
       </SidebarInset>

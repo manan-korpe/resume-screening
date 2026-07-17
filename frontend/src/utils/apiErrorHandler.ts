@@ -7,6 +7,7 @@ const apiErrorHandler = (err:any) =>{
     } else {
       toast.error("Something went wrong");
     }
+    return err.response?.data?.message ?? "Something went wrong";
 }
 
 export {

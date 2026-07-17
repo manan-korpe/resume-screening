@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import { generateAccessToken, generateRefreshToken } from "../utils/tokenHalper.js";
 import { query } from "../config/db.js";
+import { buildQuery } from "../utils/queryBuilder.js";
 
 const option = {
     httpOnly: true,
@@ -39,13 +40,13 @@ const login = asyncHandler(async (req, res, next) => {
     user = user.rows[0];
 
     if (!user) {
-        ResponseHalper.error(res, "Invalid email or password",401);
+        ResponseHalper.error(res, "Invalid email or password", 401);
     }
 
     const isValid = await bcrypt.compare(password, user.password);
 
     if (!isValid) {
-        ResponseHalper.error(res, "Invalid email or password",401)
+        ResponseHalper.error(res, "Invalid email or password", 401)
     }
 
     const accessToken = generateAccessToken(user);
@@ -68,8 +69,8 @@ const login = asyncHandler(async (req, res, next) => {
 const logout = asyncHandler(async (req, res, next) => {
     const { id } = req.body;
     res
-        .clearCookie("accessToken",option)
-        .clearCookie("refreshToken",option);
+        .clearCookie("accessToken", option)
+        .clearCookie("refreshToken", option);
 
     await query("update users set accesstoken=$1, refreshtoken=$2 where id=$3", [null, null, id]);
 
@@ -82,30 +83,30 @@ const logout = asyncHandler(async (req, res, next) => {
 });
 
 const resetPassword = asyncHandler(async (req, res, next) => {
-    const {oldPassword,password} =req.body;
-    
-    const isValidPassword = await bcrypt.compare(oldPassword,req.user?.password);
-    if(!isValidPassword){
-        ResponseHalper.error(res, "Invalid old password.",400);
+    const { oldPassword, password } = req.body;
+
+    const isValidPassword = await bcrypt.compare(oldPassword, req.user?.password);
+    if (!isValidPassword) {
+        ResponseHalper.error(res, "Invalid old password.", 400);
     }
 
-    const hashPassword = await bcrypt.hash(password,10);
-    const user = await query("update users set password=$1 where id=$2",[hashPassword, req.user?.id]);
+    const hashPassword = await bcrypt.hash(password, 10);
+    const user = await query("update users set password=$1 where id=$2", [hashPassword, req.user?.id]);
 
-    if(user.rowCount === 0){
-        ResponseHalper.error(res,"Forget password failed.");
+    if (user.rowCount === 0) {
+        ResponseHalper.error(res, "Forget password failed.");
     }
 
-    return ResponseHalper.success(res, "Password successfuly set.",{},201);
+    return ResponseHalper.success(res, "Password successfuly set.", {}, 201);
 });
 
 const forgetPassword = asyncHandler(async (req, res, next) => {
 
 });
 
-const me = asyncHandler(async(req, res, next)=>{
-    const {id, name, email, role, create_at} = req.user;
-    ResponseHalper.success(res,"User Found.",{id, name, email, role, create_at},200);
+const me = asyncHandler(async (req, res, next) => {
+    const { id, name, email, role, create_at } = req.user;
+    ResponseHalper.success(res, "User Found.", { id, name, email, role, create_at }, 200);
 });
 
 const refreshAccessToken = asyncHandler(async (req, res, next) => {
@@ -149,8 +150,42 @@ const refreshAccessToken = asyncHandler(async (req, res, next) => {
 });
 
 const users = asyncHandler(async (req, res, next) => {
-    const user = await query("select * from users");
-    return ResponseHalper.success(res, user.rows, 200);
+    const {
+        page,
+        limit,
+        search,
+        sortBy,
+        order,
+        role,
+    } = req.query;
+
+    const qu = buildQuery(req, {
+        searchableFields: ["name", "email"],
+        sortableFields: ["id", "name"],
+    });
+
+
+    const sql = `
+      SELECT *
+      FROM users
+      ${qu.whereClause}
+      ${qu.orderClause}
+      ${qu.paginationClause}
+  `;
+    const user = await query(sql, qu.values);
+
+    const filterValues = qu.values.slice(0, -2);
+    const countResult= await query(`SELECT count(*)
+      FROM users
+      ${qu.whereClause}`,filterValues);
+    const total = Number(countResult.rows[0].count);
+    return ResponseHalper.success(res, {
+        data:user.rows,
+        page,
+        limit,
+        total,
+        totalPages:Math.ceil(total/limit)
+    }, 200);
 });
 
 const singleUser = asyncHandler(async (req, res, next) => {
