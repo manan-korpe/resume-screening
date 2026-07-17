@@ -8,7 +8,7 @@ import { query } from "../config/db.js";
 const option = {
     httpOnly: true,
     secure: true,
-    sameSite: "strict"
+    sameSite: "none"
 };
 
 const register = asyncHandler(async (req, res, next) => {
@@ -81,7 +81,7 @@ const logout = asyncHandler(async (req, res, next) => {
     );
 });
 
-const forgetPassword = asyncHandler(async (req, res, next) => {
+const resetPassword = asyncHandler(async (req, res, next) => {
     const {oldPassword,password} =req.body;
     
     const isValidPassword = await bcrypt.compare(oldPassword,req.user?.password);
@@ -99,8 +99,13 @@ const forgetPassword = asyncHandler(async (req, res, next) => {
     return ResponseHalper.success(res, "Password successfuly set.",{},201);
 });
 
-const resetPassword = asyncHandler(async (req, res, next) => {
+const forgetPassword = asyncHandler(async (req, res, next) => {
 
+});
+
+const me = asyncHandler(async(req, res, next)=>{
+    const {id, name, email, role, create_at} = req.user;
+    ResponseHalper.success(res,"User Found.",{id, name, email, role, create_at},200);
 });
 
 const refreshAccessToken = asyncHandler(async (req, res, next) => {
@@ -166,6 +171,7 @@ export {
     logout,
     forgetPassword,
     resetPassword,
+    me,
     refreshAccessToken,
     users,
     singleUser

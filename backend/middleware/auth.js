@@ -5,7 +5,7 @@ import {query} from "../config/db.js";
 
 const authenticate = asyncHandler(async(req, res, next)=>{
     const token = req.cookies?.accessToken || req.header("Authorization")?.replace("bearer","");
-
+    console.log(req.cookies);
     if(!token){
         ResponseHalper.error(res, "Access denied.",401);
     }
