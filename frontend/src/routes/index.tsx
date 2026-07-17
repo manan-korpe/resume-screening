@@ -3,29 +3,36 @@ import { createBrowserRouter } from "react-router-dom";
 import AuthLayout from "../layouts/Auth.layout.tsx";
 import MainLayout from "../layouts/main.layout.tsx";
 //pages
-import ProtectedRoute from "@/pages/ProtectedRoute.tsx";
+import ProtectedRoute from "@/utils/ProtectedRoute.tsx";
 import Login from "../pages/auth/Login";
 import App from "../App";
 import Register from "@/pages/auth/Register.tsx";
 import ResetPassword from "@/pages/auth/ResetPassword.tsx";
-import GuestRoute from "@/pages/GuestRoute.tsx";
+import GuestRoute from "@/utils/GuestRoute.tsx";
 import Users from "@/pages/user/Users.tsx";
 import HrRegister from "@/pages/admin/HrRegister.tsx";
-
+import Page403 from "@/pages/403.tsx";
+import RoleProtectedRoute from "@/utils/RoleProtectedRoute.tsx";
+import Home from "@/pages/Home.tsx";
 export const router = createBrowserRouter([
   {
-    element: <MainLayout />,
+    path: "/",
+    element: <Home></Home>,
+  },
+  {
+    element: <RoleProtectedRoute allowedRoles={[0]} />,
     children: [
       {
-        path: "/",
-        element: <Users />,
-      },
-      {
         path: "admin",
+        element: <MainLayout />,
         children: [
           {
             path: "hrregister",
             element: <HrRegister />,
+          },
+          {
+            path: "users",
+            element: <Users />,
           },
         ],
       },
@@ -58,5 +65,9 @@ export const router = createBrowserRouter([
         ],
       },
     ],
+  },
+  {
+    path: "403",
+    element: <Page403 />,
   },
 ]);

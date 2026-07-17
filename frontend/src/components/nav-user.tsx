@@ -1,4 +1,10 @@
-import { LogOut, CircleUser, BellDot, EllipsisVertical } from "lucide-react";
+import {
+  LogOut,
+  CircleUser,
+  BellDot,
+  EllipsisVertical,
+  Lock,
+} from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -16,6 +22,8 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { useLogout } from "@/hooks/useLogout";
+import { Link } from "react-router-dom";
 
 export function NavUser({
   user,
@@ -23,11 +31,11 @@ export function NavUser({
   user: {
     name: string;
     email: string;
-    avatar: string;
   };
 }) {
+  console.log(user);
+  const logoutMutation = useLogout();
   const { isMobile } = useSidebar();
-
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -38,7 +46,7 @@ export function NavUser({
               className=" data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <Avatar className="h-8 w-8 rounded-lg grayscale">
-                <AvatarImage src={user.avatar} alt={user.name} />
+                {/* <AvatarImage src={user.avatar} alt={user.name} /> */}
                 <AvatarFallback className="rounded-lg">CN</AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
@@ -80,11 +88,21 @@ export function NavUser({
                 <BellDot />
                 Notifications
               </DropdownMenuItem>
+                <Link to="/auth/resetpassword" replace>
+              <DropdownMenuItem>
+                  <Lock />
+                  Reset Password
+              </DropdownMenuItem>
+                </Link>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+
+            <DropdownMenuItem
+              onClick={() => logoutMutation.mutate()}
+              disabled={logoutMutation.isPending}
+            >
               <LogOut />
-              Log out
+              {logoutMutation.isPending ? "Logging out..." : "Logout"}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

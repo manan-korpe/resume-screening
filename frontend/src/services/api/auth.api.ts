@@ -16,13 +16,19 @@ async function resetPassword(data:ResetPassword){
     return response.data;
 }
 
+async function logout(){
+    const response = await api.get("/logout");
+    return response.data;
+}
+
 async function me(){
     const response = await api.get("/me");
-    return response.data;
+    return response.data?.data;
 }
 export {
     login,
     register,
     resetPassword,
+    logout,
     me
 }

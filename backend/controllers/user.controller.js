@@ -67,7 +67,7 @@ const login = asyncHandler(async (req, res, next) => {
 });
 
 const logout = asyncHandler(async (req, res, next) => {
-    const { id } = req.body;
+    const { id } = req.user;
     res
         .clearCookie("accessToken", option)
         .clearCookie("refreshToken", option);

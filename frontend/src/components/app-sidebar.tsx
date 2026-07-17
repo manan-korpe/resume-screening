@@ -4,21 +4,20 @@ import {
   SidebarFooter,
   SidebarGroup,
   SidebarHeader,
-  SidebarGroupLabel,
-  SidebarGroupAction,
-  SidebarGroupContent,
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
-  SidebarMenuAction,
 } from "@/components/ui/sidebar";
-import { Plus, User2, LogOut, ChevronsUpDown, GalleryVerticalEnd } from "lucide-react";
+import { ChevronsUpDown, GalleryVerticalEnd } from "lucide-react";
 import { NavUser } from "./nav-user";
 import { DropdownMenu, DropdownMenuTrigger } from "./ui/dropdown-menu";
+import { Link } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const user = { name: "manan", email: "mana@gmail.com", avatar: "" };
-
+  const queryClient = useQueryClient();
+  const user = queryClient.getQueryData(["auth"]);
+  console.log(user);
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
@@ -26,6 +25,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarMenuItem>
             <DropdownMenu>
               <DropdownMenuTrigger  className="w-full">
+                <Link to="/">
                 <SidebarMenuButton
                   size="lg"
                   className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
@@ -38,6 +38,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   </div>
                   <ChevronsUpDown className="ml-auto" />
                 </SidebarMenuButton>
+                </Link>
               </DropdownMenuTrigger>
             </DropdownMenu>
           </SidebarMenuItem>
@@ -47,18 +48,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarGroup >
           <SidebarMenu className="font-2xl">
             <SidebarMenuItem className="mb-3">
+                  <Link to="users" >
                 <SidebarMenuButton asChild >
-                  <a href={""} >
                     users
-                  </a>
                 </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem className="mb-3">
-                <SidebarMenuButton asChild >
-                  <a href={""} >
-                    users
-                  </a>
-                </SidebarMenuButton>
+                  </Link>
               </SidebarMenuItem>
           </SidebarMenu>
         </SidebarGroup>
